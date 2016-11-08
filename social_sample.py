@@ -55,13 +55,13 @@ def get_mean_error(predicted_traj, true_traj, observed_length, maxNumPeds):
 def main():
     parser = argparse.ArgumentParser()
     # Observed length of the trajectory parameter
-    parser.add_argument('--obs_length', type=int, default=5,
+    parser.add_argument('--obs_length', type=int, default=4,
                         help='Observed length of the trajectory')
     # Predicted length of the trajectory parameter
-    parser.add_argument('--pred_length', type=int, default=3,
+    parser.add_argument('--pred_length', type=int, default=2,
                         help='Predicted length of the trajectory')
     # Test dataset
-    parser.add_argument('--test_dataset', type=int, default=0,
+    parser.add_argument('--test_dataset', type=int, default=1,
                         help='Dataset to be tested on')
 
     # Parse the parameters
