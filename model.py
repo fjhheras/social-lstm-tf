@@ -9,6 +9,7 @@ Date: 10th October 2016
 import tensorflow as tf
 import numpy as np
 from tensorflow.python.ops import rnn_cell
+import ipdb
 
 
 # The Vanilla LSTM model
@@ -145,16 +146,16 @@ class Model():
             x_data : target x points
             y_data : target y points
             '''
-            step = tf.constant(1e-3, dtype=tf.float32, shape=(1, 1))
+            # step = tf.constant(1e-3, dtype=tf.float32, shape=(1, 1))
 
             # Calculate the PDF of the data w.r.t to the distribution
-            result0_1 = tf_2d_normal(x_data, y_data, z_mux, z_muy, z_sx, z_sy, z_corr)
-            result0_2 = tf_2d_normal(tf.add(x_data, step), y_data, z_mux, z_muy, z_sx, z_sy, z_corr)
-            result0_3 = tf_2d_normal(x_data, tf.add(y_data, step), z_mux, z_muy, z_sx, z_sy, z_corr)
-            result0_4 = tf_2d_normal(tf.add(x_data, step), tf.add(y_data, step), z_mux, z_muy, z_sx, z_sy, z_corr)
+            result0 = tf_2d_normal(x_data, y_data, z_mux, z_muy, z_sx, z_sy, z_corr)
+            # result0_2 = tf_2d_normal(tf.add(x_data, step), y_data, z_mux, z_muy, z_sx, z_sy, z_corr)
+            # result0_3 = tf_2d_normal(x_data, tf.add(y_data, step), z_mux, z_muy, z_sx, z_sy, z_corr)
+            # result0_4 = tf_2d_normal(tf.add(x_data, step), tf.add(y_data, step), z_mux, z_muy, z_sx, z_sy, z_corr)
 
-            result0 = tf.div(tf.add(tf.add(tf.add(result0_1, result0_2), result0_3), result0_4), tf.constant(4.0, dtype=tf.float32, shape=(1, 1)))
-            result0 = tf.mul(tf.mul(result0, step), step)
+            # result0 = tf.div(tf.add(tf.add(tf.add(result0_1, result0_2), result0_3), result0_4), tf.constant(4.0, dtype=tf.float32, shape=(1, 1)))
+            # result0 = tf.mul(tf.mul(result0, step), step)
 
             # For numerical stability purposes
             epsilon = 1e-20
@@ -224,13 +225,14 @@ class Model():
         # Train operator
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
-    def sample(self, sess, traj, num=10):
+    def sample(self, sess, traj, true_traj, num=10):
         '''
         Given an initial trajectory (as a list of tuples of points), predict the future trajectory
         until a few timesteps
         Params:
         sess: Current session of Tensorflow
         traj: List of past trajectory points
+        true_traj : List of complete trajectory points
         num: Number of time-steps into the future to be predicted
         '''
         def sample_gaussian_2d(mux, muy, sx, sy, rho):
@@ -276,13 +278,15 @@ class Model():
         prev_data[0, 0, 0] = last_pos[0]  # x
         prev_data[0, 0, 1] = last_pos[1]  # y
 
+        prev_target_data = np.reshape(true_traj[traj.shape[0]], (1, 1, 2))
+
         for t in range(num):
             # Create the feed dict
-            feed = {self.input_data: prev_data, self.initial_state: state}
+            feed = {self.input_data: prev_data, self.initial_state: state, self.target_data: prev_target_data}
 
             # Get the final state and also the coef of the distribution of the next point
-            [o_mux, o_muy, o_sx, o_sy, o_corr, state] = sess.run([self.mux, self.muy, self.sx, self.sy, self.corr, self.final_state], feed)
-
+            [o_mux, o_muy, o_sx, o_sy, o_corr, state, cost] = sess.run([self.mux, self.muy, self.sx, self.sy, self.corr, self.final_state, self.cost], feed)
+            # print cost
             # Sample the next point from the distribution
             next_x, next_y = sample_gaussian_2d(o_mux[0][0], o_muy[0][0], o_sx[0][0], o_sy[0][0], o_corr[0][0])
             # Append the new point to the trajectory
@@ -292,4 +296,5 @@ class Model():
             prev_data[0, 0, 0] = next_x
             prev_data[0, 0, 1] = next_y
 
+        # ipdb.set_trace()
         return ret

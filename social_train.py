@@ -27,10 +27,10 @@ def main():
     parser.add_argument('--batch_size', type=int, default=10,
                         help='minibatch size')
     # Length of sequence to be considered parameter
-    parser.add_argument('--seq_length', type=int, default=5,
+    parser.add_argument('--seq_length', type=int, default=6,
                         help='RNN sequence length')
     # Number of epochs parameter
-    parser.add_argument('--num_epochs', type=int, default=50,
+    parser.add_argument('--num_epochs', type=int, default=100,
                         help='number of epochs')
     # Frequency at which the model should be saved parameter
     parser.add_argument('--save_every', type=int, default=400,
@@ -40,7 +40,7 @@ def main():
     parser.add_argument('--grad_clip', type=float, default=10.,
                         help='clip gradients at this value')
     # Learning rate parameter
-    parser.add_argument('--learning_rate', type=float, default=0.003,
+    parser.add_argument('--learning_rate', type=float, default=0.005,
                         help='learning rate')
     # Decay rate for the learning rate parameter
     parser.add_argument('--decay_rate', type=float, default=0.95,
@@ -56,10 +56,10 @@ def main():
     parser.add_argument('--neighborhood_size', type=int, default=32,
                         help='Neighborhood size to be considered for social grid')
     # Size of the social grid parameter
-    parser.add_argument('--grid_size', type=int, default=2,
+    parser.add_argument('--grid_size', type=int, default=4,
                         help='Grid size of the social grid')
     # Maximum number of pedestrians to be considered
-    parser.add_argument('--maxNumPeds', type=int, default=27,
+    parser.add_argument('--maxNumPeds', type=int, default=40,
                         help='Maximum Number of Pedestrians')
     # The leave out dataset
     parser.add_argument('--leaveDataset', type=int, default=1,
@@ -130,9 +130,6 @@ def train(args):
                     feed = {model.input_data: x_batch, model.target_data: y_batch, model.grid_data: grid_batch}
 
                     train_loss, _ = sess.run([model.cost, model.train_op], feed)
-
-                    # if result[0][0] > 1:
-                    #    print result
 
                     loss_batch += train_loss
 

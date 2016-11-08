@@ -35,11 +35,15 @@ def get_mean_error(predicted_traj, true_traj, observed_length, maxNumPeds):
             if true_pos[j, 0] == 0:
                 # Non-existent ped
                 continue
+            elif pred_pos[j, 0] == 0:
+                # Ped comes in the prediction time. Not seen in observed part
+                continue
             else:
                 timestep_error += np.linalg.norm(true_pos[j, [1, 2]] - pred_pos[j, [1, 2]])
                 counter += 1
 
-        error[i - observed_length] = timestep_error / counter
+        if counter != 0:
+            error[i - observed_length] = timestep_error / counter
 
         # The euclidean distance is the error
         # error[i-observed_length] = np.linalg.norm(true_pos - pred_pos)

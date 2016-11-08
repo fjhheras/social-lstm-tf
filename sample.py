@@ -41,7 +41,7 @@ def main():
     parser.add_argument('--obs_length', type=int, default=5,
                         help='Observed length of the trajectory')
     # Predicted length of the trajectory parameter
-    parser.add_argument('--pred_length', type=int, default=3,
+    parser.add_argument('--pred_length', type=int, default=5,
                         help='Predicted length of the trajectory')
     # Test dataset
     parser.add_argument('--test_dataset', type=int, default=1,
@@ -88,7 +88,7 @@ def main():
         # The observed part of the trajectory
         obs_traj = x[0][:sample_args.obs_length]
         # Get the complete trajectory with both the observed and the predicted part from the model
-        complete_traj = model.sample(sess, obs_traj, num=sample_args.pred_length)
+        complete_traj = model.sample(sess, obs_traj, x[0], num=sample_args.pred_length)
 
         # Compute the mean error between the predicted part and the true trajectory
         total_error += get_mean_error(complete_traj, x[0], sample_args.obs_length)
