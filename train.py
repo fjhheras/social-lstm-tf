@@ -26,13 +26,13 @@ def main():
     parser.add_argument('--batch_size', type=int, default=50,
                         help='minibatch size')
     # Length of sequence to be considered parameter
-    parser.add_argument('--seq_length', type=int, default=10,
+    parser.add_argument('--seq_length', type=int, default=8,
                         help='RNN sequence length')
     # Number of epochs parameter
     parser.add_argument('--num_epochs', type=int, default=100,
                         help='number of epochs')
     # Frequency at which the model should be saved parameter
-    parser.add_argument('--save_every', type=int, default=500,
+    parser.add_argument('--save_every', type=int, default=400,
                         help='save frequency')
     # Gradient value at which it should be clipped
     # TODO: (resolve) Clipping gradients for now. No idea whether we should
@@ -51,14 +51,14 @@ def main():
     # Dimension of the embeddings parameter
     parser.add_argument('--embedding_size', type=int, default=128,
                         help='Embedding dimension for the spatial coordinates')
-    parser.add_argument('--leaveDataset', type=int, default=1,
+    parser.add_argument('--leaveDataset', type=int, default=3,
                         help='The dataset index to be left out in training')
     args = parser.parse_args()
     train(args)
 
 
 def train(args):
-    datasets = range(2)
+    datasets = range(4)
     # Remove the leaveDataset from datasets
     datasets.remove(args.leaveDataset)
 
@@ -67,7 +67,7 @@ def train(args):
     data_loader = DataLoader(args.batch_size, args.seq_length, datasets, forcePreProcess=True)
 
     # Save the arguments int the config file
-    with open(os.path.join('save', 'config.pkl'), 'wb') as f:
+    with open(os.path.join('save_lstm', 'config.pkl'), 'wb') as f:
         pickle.dump(args, f)
 
     # Create a Vanilla LSTM model with the arguments
@@ -114,7 +114,7 @@ def train(args):
 
                 # Save the model if the current epoch and batch number match the frequency
                 if (e * data_loader.num_batches + b) % args.save_every == 0 and ((e * data_loader.num_batches + b) > 0):
-                    checkpoint_path = os.path.join('save', 'model.ckpt')
+                    checkpoint_path = os.path.join('save_lstm', 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step=e * data_loader.num_batches + b)
                     print("model saved to {}".format(checkpoint_path))
 

@@ -15,10 +15,10 @@ class DataLoader():
         seq_length : RNN sequence length
         '''
         # List of data directories where raw data resides
-        # self.data_dirs = ['./data/eth/univ', './data/eth/hotel',
-        #                  './data/ucy/zara/zara01', './data/ucy/zara/zara02',
-        #                  './data/ucy/univ']
-        self.data_dirs = ['./data/eth/univ', './data/eth/hotel']
+        self.data_dirs = ['./data/eth/univ', './data/eth/hotel',
+                          './data/ucy/zara/zara01', './data/ucy/zara/zara02',
+                          './data/ucy/univ']
+        # self.data_dirs = ['./data/eth/univ', './data/eth/hotel']
 
         self.used_data_dirs = [self.data_dirs[x] for x in datasets]
 
