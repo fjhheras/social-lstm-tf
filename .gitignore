@@ -11,3 +11,5 @@ save
 *.backup
 test.py
 save_backup
+save_lstm
+plot
