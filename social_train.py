@@ -27,7 +27,7 @@ def main():
     parser.add_argument('--batch_size', type=int, default=10,
                         help='minibatch size')
     # Length of sequence to be considered parameter
-    parser.add_argument('--seq_length', type=int, default=6,
+    parser.add_argument('--seq_length', type=int, default=8,
                         help='RNN sequence length')
     # Number of epochs parameter
     parser.add_argument('--num_epochs', type=int, default=100,
@@ -62,14 +62,14 @@ def main():
     parser.add_argument('--maxNumPeds', type=int, default=40,
                         help='Maximum Number of Pedestrians')
     # The leave out dataset
-    parser.add_argument('--leaveDataset', type=int, default=1,
+    parser.add_argument('--leaveDataset', type=int, default=3,
                         help='The dataset index to be left out in training')
     args = parser.parse_args()
     train(args)
 
 
 def train(args):
-    datasets = range(2)
+    datasets = range(4)
     # Remove the leaveDataset from datasets
     datasets.remove(args.leaveDataset)
 
@@ -87,7 +87,8 @@ def train(args):
         # Initialize all variables in the graph
         sess.run(tf.initialize_all_variables())
         # Initialize a saver that saves all the variables in the graph
-        saver = tf.train.Saver(tf.all_variables())
+        # saver = tf.train.Saver(tf.all_variables())
+        saver = tf.train.Saver(tf.trainable_variables())
 
         # summary_writer = tf.train.SummaryWriter('/tmp/lstm/logs', graph_def=sess.graph_def)
 
