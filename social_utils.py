@@ -1,7 +1,16 @@
+'''
+Utils script for the social LSTM implementation
+Handles processing the input and target data in batches and sequences
+
+Author : Anirudh Vemula
+Date : 17th October 2016
+'''
+
 import os
 import pickle
 import numpy as np
 import ipdb
+import random
 
 # The data loader class that loads data from the datasets considering
 # each frame as a datapoint and a sequence of consecutive frames as the
@@ -17,10 +26,10 @@ class SocialDataLoader():
         forcePreProcess : Flag to forcefully preprocess the data again from csv files
         '''
         # List of data directories where raw data resides
-        # self.data_dirs = ['./data/eth/univ', './data/eth/hotel',
-        #                  './data/ucy/zara/zara01', './data/ucy/zara/zara02',
-        #                  './data/ucy/univ']
-        self.data_dirs = ['./data/eth/univ', './data/eth/hotel']
+        self.data_dirs = ['./data/eth/univ', './data/eth/hotel',
+                          './data/ucy/zara/zara01', './data/ucy/zara/zara02',
+                          './data/ucy/univ']
+        # self.data_dirs = ['./data/eth/univ', './data/eth/hotel']
 
         self.used_data_dirs = [self.data_dirs[x] for x in datasets]
 
@@ -164,8 +173,11 @@ class SocialDataLoader():
 
         # Calculate the number of batches
         self.num_batches = int(counter/self.batch_size)
+        # On an average, we need twice the number of batches to cover the data
+        # due to randomization introduced
+        self.num_batches = self.num_batches * 2
 
-    def next_batch(self):
+    def next_batch(self, randomUpdate=True):
         '''
         Function to get the next batch of points
         '''
@@ -213,7 +225,13 @@ class SocialDataLoader():
 
                 x_batch.append(sourceData)
                 y_batch.append(targetData)
-                self.frame_pointer += self.seq_length
+
+                # Advance the frame pointer to a random point
+                if randomUpdate:
+                    self.frame_pointer += random.randint(1, self.seq_length)
+                else:
+                    self.frame_pointer += self.seq_length
+
                 d.append(self.dataset_pointer)
                 i += 1
             else:
