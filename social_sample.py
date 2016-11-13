@@ -4,7 +4,7 @@ import tensorflow as tf
 import os
 import pickle
 import argparse
-import ipdb
+# import ipdb
 
 from social_utils import SocialDataLoader
 from social_model import SocialModel
@@ -39,6 +39,11 @@ def get_mean_error(predicted_traj, true_traj, observed_length, maxNumPeds):
                 # Ped comes in the prediction time. Not seen in observed part
                 continue
             else:
+                if true_pos[j, 1] > 1 or true_pos[j, 1] < 0:
+                    continue
+                elif true_pos[j, 2] > 1 or true_pos[j, 2] < 0:
+                    continue
+
                 timestep_error += np.linalg.norm(true_pos[j, [1, 2]] - pred_pos[j, [1, 2]])
                 counter += 1
 
@@ -58,10 +63,10 @@ def main():
     parser.add_argument('--obs_length', type=int, default=4,
                         help='Observed length of the trajectory')
     # Predicted length of the trajectory parameter
-    parser.add_argument('--pred_length', type=int, default=2,
+    parser.add_argument('--pred_length', type=int, default=4,
                         help='Predicted length of the trajectory')
     # Test dataset
-    parser.add_argument('--test_dataset', type=int, default=1,
+    parser.add_argument('--test_dataset', type=int, default=3,
                         help='Dataset to be tested on')
 
     # Parse the parameters
@@ -94,12 +99,14 @@ def main():
     # Reset all pointers of the data_loader
     data_loader.reset_batch_pointer()
 
+    results = []
+
     # Variable to maintain total error
     total_error = 0
     # For each batch
     for b in range(data_loader.num_batches):
         # Get the source, target and dataset data for the next batch
-        x, y, d = data_loader.next_batch()
+        x, y, d = data_loader.next_batch(randomUpdate=False)
 
         # Batch size is 1
         x_batch, y_batch, d_batch = x[0], y[0], d[0]
@@ -123,8 +130,16 @@ def main():
 
         print "Processed trajectory number : ", b, "out of ", data_loader.num_batches, " trajectories"
 
+        # plot_trajectories(x[0], complete_traj, sample_args.obs_length)
+        # return
+        results.append((x[0], complete_traj, sample_args.obs_length))
+
     # Print the mean error across all the batches
     print "Total mean error of the model is ", total_error/data_loader.num_batches
+
+    print "Saving results"
+    with open(os.path.join('save', 'social_results.pkl'), 'wb') as f:
+        pickle.dump(results, f)
 
 if __name__ == '__main__':
     main()
