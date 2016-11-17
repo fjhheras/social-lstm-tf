@@ -58,6 +58,10 @@ def get_mean_error(predicted_traj, true_traj, observed_length, maxNumPeds):
 
 
 def main():
+
+    # Set random seed
+    np.random.seed(1)
+
     parser = argparse.ArgumentParser()
     # Observed length of the trajectory parameter
     parser.add_argument('--obs_length', type=int, default=4,
@@ -122,6 +126,7 @@ def main():
         obs_grid = grid_batch[:sample_args.obs_length]
         # obs_traj is an array of shape obs_length x maxNumPeds x 3
 
+        print "********************** SAMPLING A NEW TRAJECTORY", b, "******************************"
         complete_traj = model.sample(sess, obs_traj, obs_grid, dimensions, x_batch, sample_args.pred_length)
 
         # ipdb.set_trace()
