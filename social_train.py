@@ -87,8 +87,7 @@ def train(args):
         # Initialize all variables in the graph
         sess.run(tf.initialize_all_variables())
         # Initialize a saver that saves all the variables in the graph
-        # saver = tf.train.Saver(tf.all_variables())
-        saver = tf.train.Saver(tf.trainable_variables())
+        saver = tf.train.Saver(tf.all_variables())
 
         # summary_writer = tf.train.SummaryWriter('/tmp/lstm/logs', graph_def=sess.graph_def)
 
