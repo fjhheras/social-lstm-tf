@@ -11,7 +11,7 @@ import numpy as np
 from tensorflow.python.ops import rnn_cell
 from grid import getSequenceGridMask
 import ipdb
-
+import time
 
 class SocialModel():
 
@@ -165,6 +165,7 @@ class SocialModel():
                     # Extract x and y coordinates of the target data
                     # x_data and y_data would be tensors of shape 1 x 1
                     [x_data, y_data] = tf.split(1, 2, tf.slice(frame_target_data[seq], [ped, 1], [1, 2]))
+                    target_pedID = frame_target_data[seq][ped, 0]
 
                 with tf.name_scope("get_coef"):
                     # Extract coef from output of the linear output layer
@@ -176,8 +177,9 @@ class SocialModel():
 
                 with tf.name_scope("increment_cost"):
                     # If it is a non-existent ped, it should not contribute to cost
-                    self.cost = tf.select(tf.equal(pedID, nonexistent_ped), self.cost, tf.add(self.cost, lossfunc))
-                    self.counter = tf.select(tf.not_equal(pedID, nonexistent_ped), tf.add(self.counter, self.increment), self.counter)
+                    # If the ped doesn't exist in the next frame, he/she should not contribute to cost as well
+                    self.cost = tf.select(tf.logical_or(tf.equal(pedID, nonexistent_ped), tf.equal(target_pedID, nonexistent_ped)), self.cost, tf.add(self.cost, lossfunc))
+                    self.counter = tf.select(tf.logical_or(tf.equal(pedID, nonexistent_ped), tf.equal(target_pedID, nonexistent_ped)), self.counter, tf.add(self.counter, self.increment))
 
         with tf.name_scope("mean_cost"):
             # Mean of the cost
@@ -378,16 +380,25 @@ class SocialModel():
         prev_target_data = np.reshape(true_traj[traj.shape[0]], (1, self.maxNumPeds, 3))
         # Prediction
         for t in range(num):
+            print "**** NEW PREDICTION TIME STEP", t, "****"
             feed = {self.input_data: prev_data, self.LSTM_states: states, self.grid_data: prev_grid_data, self.target_data: prev_target_data}
             [output, states, cost] = sess.run([self.final_output, self.final_states, self.cost], feed)
-            # print cost
+            print "Cost", cost
             # Output is a list of lists where the inner lists contain matrices of shape 1x5. The outer list contains only one element (since seq_length=1) and the inner list contains maxNumPeds elements
             # output = output[0]
             newpos = np.zeros((1, self.maxNumPeds, 3))
             for pedindex, pedoutput in enumerate(output):
                 [o_mux, o_muy, o_sx, o_sy, o_corr] = np.split(pedoutput[0], 5, 0)
                 mux, muy, sx, sy, corr = o_mux[0], o_muy[0], np.exp(o_sx[0]), np.exp(o_sy[0]), np.tanh(o_corr[0])
+
                 next_x, next_y = self.sample_gaussian_2d(mux, muy, sx, sy, corr)
+
+                if prev_data[0, pedindex, 0] != 0:
+                    print "Pedestrian ID", prev_data[0, pedindex, 0]
+                    print "Predicted parameters", mux, muy, sx, sy, corr
+                    print "New Position", next_x, next_y
+                    print "Target Position", prev_target_data[0, pedindex, 1], prev_target_data[0, pedindex, 2]
+                    print
 
                 newpos[0, pedindex, :] = [prev_data[0, pedindex, 0], next_x, next_y]
             ret = np.vstack((ret, newpos))
