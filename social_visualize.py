@@ -27,12 +27,12 @@ def plot_trajectories(true_trajs, pred_trajs, obs_length, name):
     plt.figure()
 
     # Load the background
-    # im = plt.imread('plot/background.png')
-    # implot = plt.imshow(im)
-    # width = im.shape[0]
-    # height = im.shape[1]
-    width = 1
-    height = 1
+    im = plt.imread('plot/background.png')
+    implot = plt.imshow(im)
+    width = im.shape[0]
+    height = im.shape[1]
+    # width = 1
+    # height = 1
 
     traj_data = {}
     # For each frame/each point in all trajectories
@@ -75,8 +75,8 @@ def plot_trajectories(true_trajs, pred_trajs, obs_length, name):
         plt.plot(true_x, true_y, color=c, linestyle='solid', marker='o')
         plt.plot(pred_x, pred_y, color=c, linestyle='dashed', marker='x')
 
-    plt.ylim((0, 1))
-    plt.xlim((0, 1))
+    # plt.ylim((0, 1))
+    # plt.xlim((0, 1))
     # plt.show()
     plt.savefig('plot/'+name+'.png')
     plt.gcf().clear()
