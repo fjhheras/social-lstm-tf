@@ -210,6 +210,10 @@ class Model():
         # Get trainable_variables
         tvars = tf.trainable_variables()
 
+        # L2 loss
+        l2 = args.lambda_param * sum(tf.nn.l2_loss(tvar) for tvar in tvars)
+        self.cost = self.cost + l2
+
         # TODO: (resolve) We are clipping the gradients as is usually done in LSTM
         # implementations. Social LSTM paper doesn't mention about this at all
         # Calculate gradients of the cost w.r.t all the trainable variables

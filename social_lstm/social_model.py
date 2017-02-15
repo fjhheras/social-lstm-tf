@@ -10,8 +10,8 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.python.ops import rnn_cell
 from grid import getSequenceGridMask
-import ipdb
-import time
+import pdb
+
 
 class SocialModel():
 
@@ -188,6 +188,10 @@ class SocialModel():
         # Get all trainable variables
         tvars = tf.trainable_variables()
 
+        # L2 loss
+        l2 = args.lambda_param*sum(tf.nn.l2_loss(tvar) for tvar in tvars)
+        self.cost = self.cost + l2
+
         # Get the final LSTM states
         self.final_states = tf.concat(0, self.initial_states)
 
@@ -272,12 +276,6 @@ class SocialModel():
 
         # Calculate the PDF of the data w.r.t to the distribution
         result0 = self.tf_2d_normal(x_data, y_data, z_mux, z_muy, z_sx, z_sy, z_corr)
-        # result0_2 = self.tf_2d_normal(tf.add(x_data, step), y_data, z_mux, z_muy, z_sx, z_sy, z_corr)
-        # result0_3 = self.tf_2d_normal(x_data, tf.add(y_data, step), z_mux, z_muy, z_sx, z_sy, z_corr)
-        # result0_4 = self.tf_2d_normal(tf.add(x_data, step), tf.add(y_data, step), z_mux, z_muy, z_sx, z_sy, z_corr)
-
-        # result0 = tf.div(tf.add(tf.add(tf.add(result0_1, result0_2), result0_3), result0_4), tf.constant(4.0, dtype=tf.float32, shape=(1, 1)))
-        # result0 = tf.mul(tf.mul(result0, step), step)
 
         # For numerical stability purposes
         epsilon = 1e-20
@@ -380,10 +378,10 @@ class SocialModel():
         prev_target_data = np.reshape(true_traj[traj.shape[0]], (1, self.maxNumPeds, 3))
         # Prediction
         for t in range(num):
-            print "**** NEW PREDICTION TIME STEP", t, "****"
+            # print "**** NEW PREDICTION TIME STEP", t, "****"
             feed = {self.input_data: prev_data, self.LSTM_states: states, self.grid_data: prev_grid_data, self.target_data: prev_target_data}
             [output, states, cost] = sess.run([self.final_output, self.final_states, self.cost], feed)
-            print "Cost", cost
+            # print "Cost", cost
             # Output is a list of lists where the inner lists contain matrices of shape 1x5. The outer list contains only one element (since seq_length=1) and the inner list contains maxNumPeds elements
             # output = output[0]
             newpos = np.zeros((1, self.maxNumPeds, 3))
@@ -393,12 +391,12 @@ class SocialModel():
 
                 next_x, next_y = self.sample_gaussian_2d(mux, muy, sx, sy, corr)
 
-                if prev_data[0, pedindex, 0] != 0:
-                    print "Pedestrian ID", prev_data[0, pedindex, 0]
-                    print "Predicted parameters", mux, muy, sx, sy, corr
-                    print "New Position", next_x, next_y
-                    print "Target Position", prev_target_data[0, pedindex, 1], prev_target_data[0, pedindex, 2]
-                    print
+                # if prev_data[0, pedindex, 0] != 0:
+                #     print "Pedestrian ID", prev_data[0, pedindex, 0]
+                #     print "Predicted parameters", mux, muy, sx, sy, corr
+                #     print "New Position", next_x, next_y
+                #     print "Target Position", prev_target_data[0, pedindex, 1], prev_target_data[0, pedindex, 2]
+                #     print
 
                 newpos[0, pedindex, :] = [prev_data[0, pedindex, 0], next_x, next_y]
             ret = np.vstack((ret, newpos))
