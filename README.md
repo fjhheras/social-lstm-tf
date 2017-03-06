@@ -4,4 +4,4 @@ This code/implementation is available for research purposes. If you are using th
 
 **Author** : Anirudh Vemula
 
-**Affliation** : Robotics Institute, Carnegie Mellon University
+**Affiliation** : Robotics Institute, Carnegie Mellon University
