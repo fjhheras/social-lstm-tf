@@ -65,7 +65,7 @@ def main():
     parser.add_argument('--leaveDataset', type=int, default=3,
                         help='The dataset index to be left out in training')
     # Lambda regularization parameter (L2)
-    parser.add_argument('--lambda_param', type=float, default=0.05,
+    parser.add_argument('--lambda_param', type=float, default=0.005,
                         help='L2 regularization parameter')
     args = parser.parse_args()
     train(args)
