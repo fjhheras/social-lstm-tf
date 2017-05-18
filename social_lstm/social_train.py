@@ -24,13 +24,13 @@ def main():
     parser.add_argument('--model', type=str, default='lstm',
                         help='rnn, gru, or lstm')
     # Size of each batch parameter
-    parser.add_argument('--batch_size', type=int, default=10,
+    parser.add_argument('--batch_size', type=int, default=16,
                         help='minibatch size')
     # Length of sequence to be considered parameter
-    parser.add_argument('--seq_length', type=int, default=8,
+    parser.add_argument('--seq_length', type=int, default=12,
                         help='RNN sequence length')
     # Number of epochs parameter
-    parser.add_argument('--num_epochs', type=int, default=100,
+    parser.add_argument('--num_epochs', type=int, default=50,
                         help='number of epochs')
     # Frequency at which the model should be saved parameter
     parser.add_argument('--save_every', type=int, default=400,
@@ -75,6 +75,7 @@ def train(args):
     datasets = range(4)
     # Remove the leaveDataset from datasets
     datasets.remove(args.leaveDataset)
+    # datasets = [0]
 
     # Create the SocialDataLoader object
     data_loader = SocialDataLoader(args.batch_size, args.seq_length, args.maxNumPeds, datasets, forcePreProcess=True)
@@ -85,6 +86,8 @@ def train(args):
     # Create a SocialModel object with the arguments
     model = SocialModel(args)
 
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth=True
     # Initialize a TensorFlow session
     with tf.Session() as sess:
         # Initialize all variables in the graph

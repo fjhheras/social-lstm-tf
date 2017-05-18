@@ -87,8 +87,8 @@ class SocialDataLoader():
         for directory in data_dirs:
 
             # Define path of the csv file of the current dataset
-            file_path = os.path.join(directory, 'pixel_pos.csv')
-
+            # file_path = os.path.join(directory, 'pixel_pos.csv')
+            file_path = os.path.join(directory, 'pixel_pos_interpolate.csv')
             # Load the data from the csv file
             data = np.genfromtxt(file_path, delimiter=',')
 
