@@ -72,10 +72,10 @@ def main():
 
 
 def train(args):
-    datasets = range(4)
+    # datasets = range(4)
     # Remove the leaveDataset from datasets
-    datasets.remove(args.leaveDataset)
-    # datasets = [0]
+    # datasets.remove(args.leaveDataset)
+    datasets = [0]
 
     # Create the SocialDataLoader object
     data_loader = SocialDataLoader(args.batch_size, args.seq_length, args.maxNumPeds, datasets, forcePreProcess=True, infer=False)
@@ -174,12 +174,12 @@ def train(args):
                     saver.save(sess, checkpoint_path, global_step=e * data_loader.num_batches + b)
                     print("model saved to {}".format(checkpoint_path))
                 '''
-            loss_epoch /= dataloader.num_batches
+            loss_epoch /= data_loader.num_batches
             log_file_curve.write(str(e)+','+str(loss_epoch)+',')
             print '*****************'
 
             # Validation
-            dataloader.reset_batch_pointer(valid=True)
+            data_loader.reset_batch_pointer(valid=True)
             loss_epoch = 0
 
             for b in range(data_loader.num_batches):
@@ -217,7 +217,7 @@ def train(args):
                 loss_batch = loss_batch / data_loader.batch_size
                 loss_epoch += loss_batch
 
-            loss_epoch /= dataloader.valid_num_batches
+            loss_epoch /= data_loader.valid_num_batches
 
             # Update best validation loss until now
             if loss_epoch < best_val_loss:
