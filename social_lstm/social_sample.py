@@ -64,20 +64,28 @@ def main():
 
     parser = argparse.ArgumentParser()
     # Observed length of the trajectory parameter
-    parser.add_argument('--obs_length', type=int, default=4,
+    parser.add_argument('--obs_length', type=int, default=6,
                         help='Observed length of the trajectory')
     # Predicted length of the trajectory parameter
-    parser.add_argument('--pred_length', type=int, default=4,
+    parser.add_argument('--pred_length', type=int, default=6,
                         help='Predicted length of the trajectory')
     # Test dataset
     parser.add_argument('--test_dataset', type=int, default=3,
                         help='Dataset to be tested on')
 
+    # Model to be loaded
+    parser.add_argument('--epoch', type=int, default=49,
+                        help='Epoch of model to be loaded')
+    
+
     # Parse the parameters
     sample_args = parser.parse_args()
 
+    # Save directory
+    save_directory = 'save/' + str(args.test_dataset) + '/'
+
     # Define the path for the config file for saved args
-    with open(os.path.join('save', 'social_config.pkl'), 'rb') as f:
+    with open(os.path.join(save_directory, 'social_config.pkl'), 'rb') as f:
         saved_args = pickle.load(f)
 
     # Create a SocialModel object with the saved_args and infer set to true
@@ -88,17 +96,18 @@ def main():
     saver = tf.train.Saver()
 
     # Get the checkpoint state for the model
-    ckpt = tf.train.get_checkpoint_state('save')
-    print ('loading model: ', ckpt.model_checkpoint_path)
+    ckpt = tf.train.get_checkpoint_state(save_directory)
+    # print ('loading model: ', ckpt.model_checkpoint_path)
+    print('loading model: ', ckpt.all_model_checkpoint_paths[args.epoch])
 
     # Restore the model at the checkpoint
-    saver.restore(sess, ckpt.model_checkpoint_path)
+    saver.restore(sess, ckpt.all_model_checkpoint_paths[args.epoch])
 
     # Dataset to get data from
     dataset = [sample_args.test_dataset]
 
     # Create a SocialDataLoader object with batch_size 1 and seq_length equal to observed_length + pred_length
-    data_loader = SocialDataLoader(1, sample_args.pred_length + sample_args.obs_length, saved_args.maxNumPeds, dataset, True)
+    data_loader = SocialDataLoader(1, sample_args.pred_length + sample_args.obs_length, saved_args.maxNumPeds, dataset, True, infer=True)
 
     # Reset all pointers of the data_loader
     data_loader.reset_batch_pointer()
@@ -143,7 +152,7 @@ def main():
     print "Total mean error of the model is ", total_error/data_loader.num_batches
 
     print "Saving results"
-    with open(os.path.join('save', 'social_results.pkl'), 'wb') as f:
+    with open(os.path.join(save_directory, 'social_results.pkl'), 'wb') as f:
         pickle.dump(results, f)
 
 if __name__ == '__main__':
