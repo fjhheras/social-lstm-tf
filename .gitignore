@@ -3,7 +3,6 @@
 *.vsp
 *.txt
 *.mat
-*.m
 *.png
 *.pyc
 save
